@@ -4,6 +4,8 @@ import { AppModule } from "../src/app.module";
 import { configureApp, createAdapter } from "../src/app.factory";
 import { Channel } from "../src/command/command.schema";
 import { MAX_PER_CHANNEL } from "../src/command/command-queue.service";
+import { AgentPublisher } from "../src/agent/agent-publisher";
+import { InMemoryAgentPublisher } from "../src/agent/in-memory-agent-publisher";
 import { InMemorySensorRepository } from "../src/sensor/in-memory-sensor.repository";
 import { SensorRepository } from "../src/sensor/sensor.repository";
 
@@ -53,6 +55,8 @@ export async function bootApp(): Promise<NestFastifyApplication> {
   const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
     .overrideProvider(SensorRepository)
     .useClass(InMemorySensorRepository)
+    .overrideProvider(AgentPublisher)
+    .useClass(InMemoryAgentPublisher)
     .compile();
   const app = moduleRef.createNestApplication<NestFastifyApplication>(
     createAdapter(),

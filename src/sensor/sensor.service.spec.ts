@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
+import { InMemoryAgentPublisher } from "../agent/in-memory-agent-publisher";
 import { InMemorySensorRepository } from "./in-memory-sensor.repository";
 import { SensorService } from "./sensor.service";
 import type { SensorSnapshot } from "./sensor.schema";
@@ -13,10 +14,12 @@ const snapshot = (overrides: Partial<SensorSnapshot> = {}): SensorSnapshot => ({
 describe("SensorService", () => {
   let service: SensorService;
   let repository: InMemorySensorRepository;
+  let publisher: InMemoryAgentPublisher;
 
   beforeEach(() => {
     repository = new InMemorySensorRepository();
-    service = new SensorService(repository);
+    publisher = new InMemoryAgentPublisher();
+    service = new SensorService(repository, publisher);
   });
 
   it("returns null before any snapshot is set", () => {
@@ -40,5 +43,12 @@ describe("SensorService", () => {
     service.setLatest(snap);
     await Promise.resolve();
     expect(repository.saved).toEqual([snap]);
+  });
+
+  it("forwards each snapshot to the agent", async () => {
+    const snap = snapshot();
+    service.setLatest(snap);
+    await Promise.resolve();
+    expect(publisher.published).toEqual([snap]);
   });
 });
