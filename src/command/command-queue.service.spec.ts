@@ -15,10 +15,9 @@ describe("CommandQueueService", () => {
   });
 
   it("starts empty for every channel", () => {
-    expect(service.size("haptic")).toBe(0);
-    expect(service.size("face")).toBe(0);
-    expect(service.size("beep")).toBe(0);
     expect(service.dequeue("haptic")).toBeNull();
+    expect(service.dequeue("face")).toBeNull();
+    expect(service.dequeue("beep")).toBeNull();
   });
 
   it("returns the enqueued command with a UUID id and ISO timestamp", () => {
@@ -34,7 +33,6 @@ describe("CommandQueueService", () => {
     const first = service.enqueue("haptic", { n: 1 });
     const second = service.enqueue("haptic", { n: 2 });
     const third = service.enqueue("haptic", { n: 3 });
-    expect(service.size("haptic")).toBe(3);
 
     expect(service.dequeue("haptic")?.id).toBe(first?.id);
     expect(service.dequeue("haptic")?.id).toBe(second?.id);
@@ -46,10 +44,7 @@ describe("CommandQueueService", () => {
     const h = service.enqueue("haptic", {});
     const f = service.enqueue("face", {});
 
-    expect(service.size("haptic")).toBe(1);
-    expect(service.size("face")).toBe(1);
-    expect(service.size("beep")).toBe(0);
-
+    expect(service.dequeue("beep")).toBeNull();
     expect(service.dequeue("face")?.id).toBe(f?.id);
     expect(service.dequeue("haptic")?.id).toBe(h?.id);
   });
@@ -58,9 +53,7 @@ describe("CommandQueueService", () => {
     for (let i = 0; i < MAX_PER_CHANNEL; i++) {
       expect(service.enqueue("haptic", { i })).not.toBeNull();
     }
-    expect(service.size("haptic")).toBe(MAX_PER_CHANNEL);
     expect(service.enqueue("haptic", { overflow: true })).toBeNull();
-    expect(service.size("haptic")).toBe(MAX_PER_CHANNEL);
   });
 
   it("re-accepts after dequeue frees a slot", () => {
@@ -72,7 +65,6 @@ describe("CommandQueueService", () => {
     service.dequeue("haptic");
 
     expect(service.enqueue("haptic", { nowOk: true })).not.toBeNull();
-    expect(service.size("haptic")).toBe(MAX_PER_CHANNEL);
   });
 
   it("does not affect other channels when one is full", () => {

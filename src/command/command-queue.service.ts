@@ -9,7 +9,7 @@ export class CommandQueueService {
 
   enqueue(channel: Channel, payload: unknown): Command | null {
     let queue = this.queues.get(channel);
-    if (!queue) {
+    if (queue === undefined) {
       queue = [];
       this.queues.set(channel, queue);
     }
@@ -30,9 +30,5 @@ export class CommandQueueService {
 
   dequeue(channel: Channel): Command | null {
     return this.queues.get(channel)?.shift() ?? null;
-  }
-
-  size(channel: Channel): number {
-    return this.queues.get(channel)?.length ?? 0;
   }
 }

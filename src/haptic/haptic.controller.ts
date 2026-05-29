@@ -1,29 +1,13 @@
-import {
-  Body,
-  Controller,
-  Post,
-  ServiceUnavailableException,
-} from "@nestjs/common";
-import { CommandQueueService } from "../command/command-queue.service";
-import { SensorService } from "../sensor/sensor.service";
-import { SensorSnapshot } from "../sensor/sensor.schema";
+import { Body, Controller, Post } from "@nestjs/common";
+import { OutputResult, OutputService } from "../output/output.service";
 import { HapticDto } from "./haptic.schema";
 
 @Controller("haptic")
 export class HapticController {
-  constructor(
-    private readonly queue: CommandQueueService,
-    private readonly sensor: SensorService,
-  ) {}
+  constructor(private readonly output: OutputService) {}
 
   @Post()
-  create(
-    @Body() body: HapticDto,
-  ): { accepted: string; sensor: SensorSnapshot | null } {
-    const cmd = this.queue.enqueue("haptic", body);
-    if (cmd === null) {
-      throw new ServiceUnavailableException("queue full");
-    }
-    return { accepted: cmd.id, sensor: this.sensor.getLatest() };
+  create(@Body() body: HapticDto): OutputResult {
+    return this.output.dispatch("haptic", body);
   }
 }

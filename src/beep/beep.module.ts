@@ -1,10 +1,9 @@
 import { Module } from "@nestjs/common";
-import { SensorModule } from "../sensor/sensor.module";
+import { OutputModule } from "../output/output.module";
 import { BeepController } from "./beep.controller";
-import { CommandModule } from "../command/command.module";
 
 @Module({
-  imports: [CommandModule, SensorModule],
+  imports: [OutputModule],
   controllers: [BeepController],
 })
 export class BeepModule {}
