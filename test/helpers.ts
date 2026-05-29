@@ -1,7 +1,11 @@
 import { NestFastifyApplication } from "@nestjs/platform-fastify";
-import { createApp } from "../src/app.factory";
+import { Test } from "@nestjs/testing";
+import { AppModule } from "../src/app.module";
+import { configureApp, createAdapter } from "../src/app.factory";
 import { Channel } from "../src/command/command.schema";
 import { MAX_PER_CHANNEL } from "../src/command/command-queue.service";
+import { InMemorySensorRepository } from "../src/sensor/in-memory-sensor.repository";
+import { SensorRepository } from "../src/sensor/sensor.repository";
 
 export const TEST_TOKEN = process.env.BRIDGE_TOKEN ?? "test-bridge-token";
 
@@ -46,7 +50,15 @@ export interface AcceptedResponse {
 }
 
 export async function bootApp(): Promise<NestFastifyApplication> {
-  const app = await createApp({ silent: true });
+  const moduleRef = await Test.createTestingModule({ imports: [AppModule] })
+    .overrideProvider(SensorRepository)
+    .useClass(InMemorySensorRepository)
+    .compile();
+  const app = moduleRef.createNestApplication<NestFastifyApplication>(
+    createAdapter(),
+    { logger: false },
+  );
+  await configureApp(app);
   await app.init();
   await app.getHttpAdapter().getInstance().ready();
   return app;

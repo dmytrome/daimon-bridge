@@ -8,11 +8,13 @@ export const ConfigSchema = z
     PORT: z.coerce.number().int().positive().default(DEFAULT_PORT),
     HOST: z.string().min(1).default(DEFAULT_HOST),
     BRIDGE_TOKEN: z.string().min(1),
+    DATABASE_URL: z.url(),
   })
   .transform((env) => ({
     port: env.PORT,
     host: env.HOST,
     bridgeToken: env.BRIDGE_TOKEN,
+    databaseUrl: env.DATABASE_URL,
   }));
 
 export type AppConfig = z.infer<typeof ConfigSchema>;

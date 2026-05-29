@@ -1,5 +1,5 @@
-import { NestFactory } from "@nestjs/core";
 import helmet from "@fastify/helmet";
+import { NestFactory } from "@nestjs/core";
 import {
   FastifyAdapter,
   NestFastifyApplication,
@@ -12,16 +12,23 @@ export interface CreateAppOptions {
   silent?: boolean;
 }
 
+export function createAdapter(): FastifyAdapter {
+  return new FastifyAdapter({ bodyLimit: MAX_BODY_BYTES });
+}
+
+export async function configureApp(app: NestFastifyApplication): Promise<void> {
+  await app.register(helmet);
+  app.enableShutdownHooks();
+}
+
 export async function createApp(
   options: CreateAppOptions = {},
 ): Promise<NestFastifyApplication> {
-  const adapter = new FastifyAdapter({ bodyLimit: MAX_BODY_BYTES });
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
-    adapter,
+    createAdapter(),
     options.silent === true ? { logger: false } : {},
   );
-  await app.register(helmet);
-  app.enableShutdownHooks();
+  await configureApp(app);
   return app;
 }

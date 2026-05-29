@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
+import { InMemorySensorRepository } from "./in-memory-sensor.repository";
 import { SensorService } from "./sensor.service";
 import type { SensorSnapshot } from "./sensor.schema";
 
@@ -11,9 +12,11 @@ const snapshot = (overrides: Partial<SensorSnapshot> = {}): SensorSnapshot => ({
 
 describe("SensorService", () => {
   let service: SensorService;
+  let repository: InMemorySensorRepository;
 
   beforeEach(() => {
-    service = new SensorService();
+    repository = new InMemorySensorRepository();
+    service = new SensorService(repository);
   });
 
   it("returns null before any snapshot is set", () => {
@@ -30,5 +33,12 @@ describe("SensorService", () => {
     service.setLatest(snapshot({ temperature: 10 }));
     service.setLatest(snapshot({ temperature: 30 }));
     expect(service.getLatest()?.temperature).toBe(30);
+  });
+
+  it("persists each snapshot to the repository", async () => {
+    const snap = snapshot();
+    service.setLatest(snap);
+    await Promise.resolve();
+    expect(repository.saved).toEqual([snap]);
   });
 });

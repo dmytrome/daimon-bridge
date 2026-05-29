@@ -9,6 +9,7 @@ export default defineConfig({
     env: {
       NODE_ENV: "test",
       BRIDGE_TOKEN: "test-bridge-token",
+      DATABASE_URL: "postgres://test:test@127.0.0.1:5433/daimon_test",
     },
   },
   plugins: [
