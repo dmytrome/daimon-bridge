@@ -8,7 +8,9 @@ import { CommandModule } from "./command/command.module";
 import { FaceModule } from "./face/face.module";
 import { HapticModule } from "./haptic/haptic.module";
 import { HealthModule } from "./health/health.module";
+import { ConfigModule } from "@nestjs/config";
 import { SensorModule } from "./sensor/sensor.module";
+import { validateEnv } from "./config/env.schema";
 
 @Module({
   imports: [
@@ -19,6 +21,11 @@ import { SensorModule } from "./sensor/sensor.module";
     HapticModule,
     FaceModule,
     BeepModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+      validate: validateEnv,
+      ignoreEnvFile: process.env.NODE_ENV === "test",
+    }),
   ],
   providers: [
     { provide: APP_PIPE, useClass: ZodValidationPipe },

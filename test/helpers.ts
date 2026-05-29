@@ -3,7 +3,7 @@ import { createApp } from "../src/app.factory";
 import { Channel } from "../src/command/command.schema";
 import { MAX_PER_CHANNEL } from "../src/command/command-queue.service";
 
-export const TEST_TOKEN = "test-bridge-token";
+export const TEST_TOKEN = process.env.BRIDGE_TOKEN ?? "test-bridge-token";
 
 export const AUTH_HEADERS = {
   authorization: `Bearer ${TEST_TOKEN}`,
@@ -46,7 +46,6 @@ export interface AcceptedResponse {
 }
 
 export async function bootApp(): Promise<NestFastifyApplication> {
-  process.env.BRIDGE_TOKEN = TEST_TOKEN;
   const app = await createApp({ silent: true });
   await app.init();
   await app.getHttpAdapter().getInstance().ready();
@@ -73,7 +72,7 @@ export async function drainChannel(
 export async function setSensor(
   app: NestFastifyApplication,
   snapshot: ReturnType<typeof freshSnapshot> = freshSnapshot(),
-): Promise<{ capturedAt: string; temperature: number; motion: boolean }> {
+): Promise<ReturnType<typeof freshSnapshot>> {
   await app.inject({
     method: "POST",
     url: "/sensor/update",

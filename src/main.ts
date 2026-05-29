@@ -1,13 +1,13 @@
 import "reflect-metadata";
+import { ConfigService } from "@nestjs/config";
 import { createApp } from "./app.factory";
-
-const DEFAULT_PORT = 3000;
-const DEFAULT_HOST = "127.0.0.1";
+import { AppConfig } from "./config/env.schema";
 
 async function bootstrap(): Promise<void> {
   const app = await createApp();
-  const port = Number(process.env.PORT) || DEFAULT_PORT;
-  const host = process.env.HOST ?? DEFAULT_HOST;
+  const config = app.get<ConfigService<AppConfig, true>>(ConfigService);
+  const port = config.get("port", { infer: true });
+  const host = config.get("host", { infer: true });
   await app.listen(port, host);
 }
 

@@ -2,11 +2,12 @@ import {
   CanActivate,
   ExecutionContext,
   Injectable,
-  InternalServerErrorException,
   UnauthorizedException,
 } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { Reflector } from "@nestjs/core";
 import { timingSafeEqual } from "node:crypto";
+import { AppConfig } from "../config/env.schema";
 import { IS_PUBLIC_KEY } from "./public.decorator";
 
 interface IncomingRequest {
@@ -17,14 +18,13 @@ interface IncomingRequest {
 export class BearerAuthGuard implements CanActivate {
   private readonly tokenBuffer: Buffer;
 
-  constructor(private readonly reflector: Reflector) {
-    const token = process.env.BRIDGE_TOKEN;
-    if (token === undefined || token.length === 0) {
-      throw new InternalServerErrorException(
-        "BRIDGE_TOKEN env variable must be set",
-      );
-    }
-    this.tokenBuffer = Buffer.from(token);
+  constructor(
+    private readonly reflector: Reflector,
+    configService: ConfigService<AppConfig, true>,
+  ) {
+    this.tokenBuffer = Buffer.from(
+      configService.getOrThrow("bridgeToken", { infer: true }),
+    );
   }
 
   canActivate(context: ExecutionContext): boolean {

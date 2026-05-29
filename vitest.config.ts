@@ -6,6 +6,10 @@ export default defineConfig({
   test: {
     root: "./",
     include: ["src/**/*.spec.ts", "test/**/*.e2e-spec.ts"],
+    env: {
+      NODE_ENV: "test",
+      BRIDGE_TOKEN: "test-bridge-token",
+    },
   },
   plugins: [
     swc.vite({
